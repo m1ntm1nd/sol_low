@@ -159,6 +159,20 @@ contract KERC20 is IERC20{
         return true;
     }
     
+    function burn(address _account, uint256 _amount) public  {
+        require(_account != address(0), "ERC20: burn from the zero address");
+
+        uint256 accountBalance = _balances[_account];
+        require(accountBalance >= _amount, "ERC20: burn amount exceeds balance");
+        _balances[_account] = accountBalance.sub(_amount);
+        
+        _total -= _amount;
+
+        emit Transfer(_account, address(0), _amount);
+
+    }
+    
+    
     
     function _msgSender() internal view  returns (address) {
         return msg.sender;
