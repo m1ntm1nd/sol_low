@@ -81,7 +81,7 @@ abstract contract Ownable is Context {
         require(owner() == _msgSender(), "Ownable: caller is not the owner");
         _;
     }
-
+    
     function renounceOwnership() public virtual onlyOwner {
         _setOwner(address(0));
     }
@@ -98,14 +98,38 @@ abstract contract Ownable is Context {
     }
 }
 
+abstract contract Mintable is Context, Ownable{
+    
+    mapping(address => bool) private _minters;
+    
+    event MinterTrueFalse(address indexed minter, bool statement);
+    
+    function promoteMinter(address minter) public virtual onlyOwner{
+        _minters[minter] = true;
+        
+        emit MinterTrueFalse(minter, true);
+    }
+    
+    function demoteMinter(address minter) public virtual onlyOwner{
+        _minters[minter] = false;
+        
+        emit MinterTrueFalse(minter, false);
+    }
+    
+    modifier onlyMinter(){
+        require(_minters[_msgSender()] != false, "Mintable: caller is not the minter");
+        _;
+    }
+}
 
-contract KERC20 is Context, IERC20, IERC20Metadata, Ownable {
+
+contract KERC20 is Context, IERC20, IERC20Metadata, Ownable, Mintable {
     
     using SafeMath for uint;
 
     mapping(address => uint256) private _balances;
     mapping(address => mapping(address => uint256)) private _allowances;
-
+    
     uint256 private _totalSupply;
     uint8 private _decimals;
     
@@ -117,8 +141,8 @@ contract KERC20 is Context, IERC20, IERC20Metadata, Ownable {
         _symbol = symbol_;
         _decimals = decimals_;
         
-        _totalSupply = _totalSupply.add(initialSupply_);
-        _balances[owner()] = initialSupply_;
+        
+        _mint(owner(), initialSupply_); 
     }
     
 
@@ -143,11 +167,15 @@ contract KERC20 is Context, IERC20, IERC20Metadata, Ownable {
         return _balances[account];
     }
 
-    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
-        _transfer(_msgSender(), recipient, amount);
+    function transfer(address recipient, uint amount) override public returns(bool){
+
+        _balances[_msgSender()] = _balances[_msgSender()].sub(amount);
+        _balances[recipient] = _balances[recipient].add(amount);
+        
+        emit Transfer(_msgSender(), recipient, amount);
         return true;
     }
-
+    
     function allowance(address owner, address spender) public view virtual override returns (uint256) {
         return _allowances[owner][spender];
     }
@@ -175,68 +203,38 @@ contract KERC20 is Context, IERC20, IERC20Metadata, Ownable {
         return true;
     }
     
-    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
-     * the total supply.
-     *
-     * Emits a {Transfer} event with `from` set to the zero address.
-     *
-     * Requirements:
-     *
-     * - `account` cannot be the zero address.
-     */
+    
+    function mint(address account, uint256 amount) public onlyMinter{
+        _mint(account, amount);
+    }
+    
     function _mint(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: mint to the zero address");
 
-        _beforeTokenTransfer(address(0), account, amount);
-
-        _totalSupply += amount;
-        _balances[account] += amount;
+        _totalSupply = _totalSupply.add(amount);
+        _balances[account] = _balances[account].add(amount);
         emit Transfer(address(0), account, amount);
 
-        _afterTokenTransfer(address(0), account, amount);
     }
 
-    /**
-     * @dev Destroys `amount` tokens from `account`, reducing the
-     * total supply.
-     *
-     * Emits a {Transfer} event with `to` set to the zero address.
-     *
-     * Requirements:
-     *
-     * - `account` cannot be the zero address.
-     * - `account` must have at least `amount` tokens.
-     */
+     function burn(address account, uint256 amount) public virtual {
+        require(account == _msgSender(), "KERC20: Possible to burn only owned coins");
+        
+        _burn(account, amount);
+    }
+    
     function _burn(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: burn from the zero address");
 
-        _beforeTokenTransfer(account, address(0), amount);
-
         uint256 accountBalance = _balances[account];
         require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
-        unchecked {
-            _balances[account] = accountBalance - amount;
-        }
-        _totalSupply -= amount;
 
+        _totalSupply = _totalSupply.sub(amount);
+        _balances[account] = _balances[account].sub(amount);
         emit Transfer(account, address(0), amount);
 
-        _afterTokenTransfer(account, address(0), amount);
     }
 
-    /**
-     * @dev Sets `amount` as the allowance of `spender` over the `owner` s tokens.
-     *
-     * This internal function is equivalent to `approve`, and can be used to
-     * e.g. set automatic allowances for certain subsystems, etc.
-     *
-     * Emits an {Approval} event.
-     *
-     * Requirements:
-     *
-     * - `owner` cannot be the zero address.
-     * - `spender` cannot be the zero address.
-     */
     function _approve(
         address owner,
         address spender,
@@ -248,6 +246,9 @@ contract KERC20 is Context, IERC20, IERC20Metadata, Ownable {
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
+
+
+
 
     /**
      * @dev Hook that is called before any transfer of tokens. This includes
