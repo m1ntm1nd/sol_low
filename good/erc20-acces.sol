@@ -6,19 +6,19 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contr
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
 
-contract KERC is ERC20, ERC20Burnable, AccessControl{
+contract KERC is ERC20, ERC20Burnable, AccessControl {
     
-    bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     
-    constructor() ERC20("KERC20", "K20") public {
+    constructor() ERC20("KERC20", "K20") {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
     
-    function promoteMinter(address minter) public onlyRole(DEFAULT_ADMIN_ROLE){
+    function promoteMinter(address minter) public onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(MINTER_ROLE, minter);
     }
     
-    function demoteMinter(address minter) public onlyRole(DEFAULT_ADMIN_ROLE){
+    function demoteMinter(address minter) public onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(MINTER_ROLE, minter);
     }
     
