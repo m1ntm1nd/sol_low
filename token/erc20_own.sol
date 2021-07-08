@@ -2,36 +2,36 @@
 
 pragma solidity ^0.8.0;
 
-library SafeMath{
+library SafeMath {
     function add(uint a, uint b) internal pure returns(uint){
         require(a+b>a);
         return a+b;
     }
     
-    function sub(uint a, uint b) internal pure returns(uint){
+    function sub(uint a, uint b) internal pure returns(uint) {
         require(a-b<a);
         return a-b;
     }
     
-    function mul(uint a, uint b) internal pure returns(uint){
+    function mul(uint a, uint b) internal pure returns(uint) {
         if (a == 0) return(0);
         uint c = a * b;
         require(c / a == b);
         return c;
     }
     
-    function div(uint a, uint b) internal pure returns(uint){
+    function div(uint a, uint b) internal pure returns(uint) {
         require(b != 0);
         return a/b;
     }
     
-    function mod(uint a, uint b) internal pure returns(uint){
+    function mod(uint a, uint b) internal pure returns(uint) {
         require(b != 0);
         return a % b;
     }
 }
 
-interface IERC20{
+interface IERC20 {
     function totalSupply() external view returns(uint);
     function balanceOf(address account) external view returns(uint);
     function allowance(address owner, address sender) external view returns(uint);
@@ -98,7 +98,7 @@ abstract contract Ownable is Context {
     }
 }
 
-abstract contract Mintable is Context, Ownable{
+abstract contract Mintable is Context, Ownable {
     
     mapping(address => bool) private _minters;
     
@@ -110,7 +110,7 @@ abstract contract Mintable is Context, Ownable{
         emit MinterTrueFalse(minter, true);
     }
     
-    function demoteMinter(address minter) public virtual onlyOwner{
+    function demoteMinter(address minter) public virtual onlyOwner {
         _minters[minter] = false;
         
         emit MinterTrueFalse(minter, false);
@@ -167,7 +167,7 @@ contract KERC20 is Context, IERC20, IERC20Metadata, Ownable, Mintable {
         return _balances[account];
     }
 
-    function transfer(address recipient, uint amount) override public returns(bool){
+    function transfer(address recipient, uint amount) override public returns(bool) { 
 
         _balances[_msgSender()] = _balances[_msgSender()].sub(amount);
         _balances[recipient] = _balances[recipient].add(amount);
@@ -204,7 +204,7 @@ contract KERC20 is Context, IERC20, IERC20Metadata, Ownable, Mintable {
     }
     
     
-    function mint(address account, uint256 amount) public onlyMinter{
+    function mint(address account, uint256 amount) public onlyMinter {
         _mint(account, amount);
     }
     
