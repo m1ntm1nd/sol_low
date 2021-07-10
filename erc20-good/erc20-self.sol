@@ -33,7 +33,7 @@ contract KERC20 is IERC20 {
         _owner = address(0);
     }
     
-    function minter_facilitate(address minter) public OnlyOwner {
+    function promote_minter(address minter) public OnlyOwner {
         _minters[minter] = true;
     }
    
