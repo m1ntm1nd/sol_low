@@ -7,8 +7,6 @@ import "../libs/SafeMath.sol";
 
 
 interface IERC20Metadata is IERC20 {
-
-
     function name() external view returns (string memory);
 
     function symbol() external view returns (string memory);
@@ -128,7 +126,7 @@ contract KERC20 is Context, IERC20, IERC20Metadata, Ownable, Mintable {
         return _balances[account];
     }
 
-    function transfer(address recipient, uint amount) override public returns(bool) { 
+    function transfer(address recipient, uint amount) public override returns (bool) { 
 
         _balances[_msgSender()] = _balances[_msgSender()].sub(amount);
         _balances[recipient] = _balances[recipient].add(amount);
@@ -150,7 +148,7 @@ contract KERC20 is Context, IERC20, IERC20Metadata, Ownable, Mintable {
         address sender,
         address recipient,
         uint amount
-    ) public virtual override returns(bool){
+    ) public virtual override returns (bool) {
         
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
