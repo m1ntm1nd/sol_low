@@ -2,47 +2,9 @@
 
 pragma solidity ^0.8.0;
 
-library SafeMath {
-    function add(uint a, uint b) internal pure returns(uint){
-        require(a+b>a);
-        return a+b;
-    }
-    
-    function sub(uint a, uint b) internal pure returns(uint) {
-        require(a-b<a);
-        return a-b;
-    }
-    
-    function mul(uint a, uint b) internal pure returns(uint) {
-        if (a == 0) return(0);
-        uint c = a * b;
-        require(c / a == b);
-        return c;
-    }
-    
-    function div(uint a, uint b) internal pure returns(uint) {
-        require(b != 0);
-        return a/b;
-    }
-    
-    function mod(uint a, uint b) internal pure returns(uint) {
-        require(b != 0);
-        return a % b;
-    }
-}
+import "../interface/IERC20.sol";
+import "../libs/SafeMath.sol";
 
-interface IERC20 {
-    function totalSupply() external view returns(uint);
-    function balanceOf(address account) external view returns(uint);
-    function allowance(address owner, address sender) external view returns(uint);
-    
-    function transfer(address recipient, uint amount) external returns(bool);
-    function approve(address spender, uint amount) external returns(bool);
-    function transferFrom(address sender, address recipient, uint amount) external returns(bool);
-    
-    event Transfer(address indexed from, address indexed to, uint value);
-    event Approval(address indexed owner, address indexed spender, uint value);
-}
 
 interface IERC20Metadata is IERC20 {
 
@@ -53,6 +15,7 @@ interface IERC20Metadata is IERC20 {
 
     function decimals() external view returns (uint8);
 }
+
 
 abstract contract Context {
     function _msgSender() internal view virtual returns (address) {
@@ -123,8 +86,7 @@ abstract contract Mintable is Context, Ownable {
 }
 
 
-contract KERC20 is Context, IERC20, IERC20Metadata, Ownable, Mintable {
-    
+contract KERC20 is Context, IERC20, IERC20Metadata, Ownable, Mintable {  
     using SafeMath for uint;
 
     mapping(address => uint256) private _balances;
@@ -140,8 +102,7 @@ contract KERC20 is Context, IERC20, IERC20Metadata, Ownable, Mintable {
         _name = name_;
         _symbol = symbol_;
         _decimals = decimals_;
-        
-        
+                
         _mint(owner(), initialSupply_); 
     }
     
