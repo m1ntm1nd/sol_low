@@ -29,25 +29,6 @@ contract KERC20 is IERC20 {
         _balances[_owner] = initialSupply_;
     }
     
-    function decetralize_contract() public OnlyOwner {
-        _owner = address(0);
-    }
-    
-    function promote_minter(address minter) public OnlyOwner {
-        _minters[minter] = true;
-    }
-   
-    
-    function demote_minter(address minter) public OnlyOwner {
-        _minters[minter] = false;
-    }
-    
-    function mint(address to, uint value) public OnlyMinter {
-        _balances[to] = _balances[to].add(value);
-        _total = _total.add(value);
-    }
-    
-    
     function totalSupply() public view override returns (uint) {
         return _total;
     }
@@ -55,10 +36,6 @@ contract KERC20 is IERC20 {
     function balanceOf(address user) public view override  returns (uint) {
         require(user != address(0), "Trying to take zero address balance");
         return _balances[user];
-    }
-   
-    function allowance(address owner, address spender) public view override  returns (uint) {
-        return _allowed[owner][spender];
     }
     
     function transfer(address to, uint value) public override  returns (bool) {
@@ -85,8 +62,39 @@ contract KERC20 is IERC20 {
         
         emit Approval(_msgSender(), spender, value);
         return true;
+    }    
+       
+    function allowance(address owner, address spender) public view override returns (uint) {
+        return _allowed[owner][spender];
     }
     
+    modifier OnlyOwner() {
+        require(_msgSender() == _Owner(), "ACCESS ERROR: caller is not the owner");
+        _;
+    }
+
+    function renounceOwnership() public OnlyOwner {
+        _owner = address(0);
+    }
+    
+    function addMinter(address minter) public OnlyOwner {
+        _minters[minter] = true;
+    }
+   
+    
+    function removeMinter(address minter) public OnlyOwner {
+        _minters[minter] = false;
+    }
+    
+    modifier OnlyMinter() {
+        require(_minters[_msgSender()] != false, "ACCESS ERROR: caller is not the minter");
+        _;
+    }
+    function mint(address to, uint value) public OnlyMinter {
+        _balances[to] = _balances[to].add(value);
+        _total = _total.add(value);
+    }
+
     function burn(address account, uint256 amount) public {
         require(account != address(0), "ERC20: burn from the zero address");
         require(account == _msgSender(), "ERC20: you can only burn owned coins");
@@ -100,7 +108,6 @@ contract KERC20 is IERC20 {
         emit Transfer(account, address(0), amount);
 
     }
-    
     
     function _msgSender() internal view  returns (address) {
         return msg.sender;
@@ -120,15 +127,5 @@ contract KERC20 is IERC20 {
     
     function _Owner() internal view returns (address) {
         return _owner;
-    }
-    
-    modifier OnlyOwner() {
-        require(_msgSender() == _Owner(), "ACCESS ERROR: caller is not the owner");
-        _;
-    }
-    
-    modifier OnlyMinter() {
-        require(_minters[_msgSender()] != false, "ACCESS ERROR: caller is not the minter");
-        _;
     }
 }
