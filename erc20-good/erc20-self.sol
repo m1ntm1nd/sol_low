@@ -90,6 +90,7 @@ contract KERC20 is IERC20 {
         require(_minters[_msgSender()] != false, "ACCESS ERROR: caller is not the minter");
         _;
     }
+    
     function mint(address to, uint value) public OnlyMinter {
         _balances[to] = _balances[to].add(value);
         _total = _total.add(value);
