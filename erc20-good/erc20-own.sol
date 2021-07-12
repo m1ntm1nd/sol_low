@@ -11,6 +11,7 @@ contract KERC is ERC20, ERC20Burnable, Ownable, Mintable {
     constructor(uint initialSupply_) ERC20("KERC20", "K20") {
         _mint(owner(), initialSupply_); 
     }
+    
     function mint(address account, uint256 amount) public onlyMinter {
         _mint(account, amount);
     }
