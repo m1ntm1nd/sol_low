@@ -48,13 +48,13 @@ abstract contract Mintable is Context, Ownable {
     
     event MinterTrueFalse(address indexed minter, bool statement);
     
-    function promoteMinter(address minter) public virtual onlyOwner{
+    function addMinter(address minter) public virtual onlyOwner{
         _minters[minter] = true;
         
         emit MinterTrueFalse(minter, true);
     }
     
-    function demoteMinter(address minter) public virtual onlyOwner {
+    function removeMinter(address minter) public virtual onlyOwner {
         _minters[minter] = false;
         
         emit MinterTrueFalse(minter, false);
